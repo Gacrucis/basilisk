@@ -1,0 +1,7 @@
+{
+  "name": "CruxAI",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
