@@ -1,45 +1,44 @@
-<ion-header [translucent]="true">
+<!-- <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>{{ chat }}</ion-title>
   </ion-toolbar>
-</ion-header>
+</ion-header> -->
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">{{ chat }}</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="content">
 
-  <!-- <div id="container">
-    <strong class="capitalize">{{ chat }}</strong>
-    <p>Explore <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+    <ion-header collapse="condense">
+      <ion-toolbar>
+        <ion-title size="large">{{ chat }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
 
-  </div> -->
+    <div class="chat">
 
-  <div class="chat">
+      <div class="conversation">
 
-    <div class="conversation">
-      <ion-list>
-        <ion-item *ngFor="let s of lst">
-          <ion-label>Pokémon Yellow</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>Mega Man X</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>The Legend of Zelda</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>Pac-Man</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>Super Mario World</ion-label>
-        </ion-item>
-      </ion-list>
+        <ion-list>
+          <ion-item *ngFor="let s of lst">
+            <ion-label>Pokémon Yellow</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>Mega Man X</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>The Legend of Zelda</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>Pac-Man</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>LAST</ion-label>
+          </ion-item>
+        </ion-list>
+
+      </div>
 
       <div class="prompt">
         <ion-item class="prompt-content">
@@ -48,8 +47,8 @@
           </ion-textarea>
         </ion-item>
       </div>
-    </div>
 
+    </div>
   </div>
 
 </ion-content>
