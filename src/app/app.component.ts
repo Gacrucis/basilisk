@@ -13,6 +13,6 @@ export class AppComponent {
     // { title: 'Trash', url: '/chat/Trash', icon: 'trash' },
     // { title: 'Spam', url: '/chat/Spam', icon: 'warning' },
   ];
-  public labels = ['Edward Parada'];
+  public labels = ['Gacrucis'];
   constructor() {}
 }

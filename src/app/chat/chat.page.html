@@ -22,7 +22,7 @@
 
         <ion-list>
           <ion-item *ngFor="let s of lst">
-            <ion-label>Pokémon Yellow</ion-label>
+            <ion-label>Buen dia</ion-label>
           </ion-item>
           <ion-item>
             <ion-label>Mega Man X</ion-label>
@@ -40,12 +40,16 @@
 
       </div>
 
-      <div class="prompt">
-        <ion-item class="prompt-content">
-          <ion-textarea placeholder="Type something here" [autoGrow]="true"
-            value="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris tellus sem, auctor accumsan egestas sed, venenatis at ex. Nam consequat ex odio, suscipit rhoncus orci dictum eget. Aenean sit amet ligula varius felis facilisis lacinia nec volutpat nulla. Duis ullamcorper sit amet turpis sed blandit. Integer pretium massa eu faucibus interdum.">
-          </ion-textarea>
-        </ion-item>
+      <div class="prompt prompt-content">
+        <!-- <ion-item class="prompt-content"> -->
+          <!-- <textarea #textbox class="textbox" placeholder="Type something here"> -->
+              <textarea #textbox class="textbox" placeholder="Type something here"></textarea>
+          <!-- </textarea> -->
+        <!-- </ion-item> -->
+
+        <ion-button class="send-button">
+          <ion-icon slot="icon-only" name="send-outline"></ion-icon>
+        </ion-button>
       </div>
 
     </div>

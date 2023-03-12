@@ -14,30 +14,66 @@ ion-menu-button {
   justify-content: space-between;
 }
 
+.conversation {
+  overflow-y: auto;
+}
+
 .prompt {
   position: sticky;
   bottom: 0px;
   border-top: 1px solid #ABB2BF;
   width: 100%;
-  // max-height: 40vh;
-  // min-height: 10vh;
-  background-color: var(--ion-background-color);
-  margin-bottom: 20px;
-  // overflow-y: hidden;
 }
-
 
 .prompt-content {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  overflow-y: auto;
+  align-items: flex-end;
 }
 
-.conversation {
-  // padding-bottom: 20px;
-  // height: fit-content;
-  overflow-y: auto;
+.textbox {
+  border: none;
+  resize: none;
+  width: 100%;
+  padding: 10px;
+}
+
+.textbox:focus {
+  outline: none;
+}
+
+.send-button {
+  margin: 10px;
+  --background: transparent;
+  --color: rgba(255, 255, 255, 0.623);
+  --box-shadow: 0;
+}
+
+// Scrollbars ////////////////////////////////////////////////////////////////////////////////////////////////////////
+::-webkit-scrollbar {
+width: 10px;
+height: 15px;
+border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+background: transparent !important;
+}
+
+::-webkit-scrollbar-track:hover {
+// background: #333335e0;
+background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+background: #ccc;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: #f4f5f8;
+}
+
+.sc-ion-textarea-md-h {
+  --padding-top: 0px !important;
 }

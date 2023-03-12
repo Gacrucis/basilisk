@@ -131,3 +131,23 @@ ion-item.selected {
 ion-menu {
   display: flex;
 }
+
+.logo {
+  padding: 0 30px 0px 30px;
+}
+
+.credits-icon {
+  color: rgb(226, 69, 69) !important;
+}
+
+a {
+  text-decoration: none;
+}
+
+.new-chat-button {
+  cursor: pointer;
+}
+
+.new-chat-button:hover {
+  --background: #ffffff0e !important;
+}

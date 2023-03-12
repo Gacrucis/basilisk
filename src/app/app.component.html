@@ -2,8 +2,10 @@
   <ion-split-pane contentId="main-content">
     <ion-menu contentId="main-content" type="overlay">
       <ion-content>
+        <img class="logo" src="../assets/icon/logo-inline.png" alt="Ionic logo" />
+
         <ion-list id="chat-list">
-          <ion-list-header>Chats</ion-list-header>
+          <!-- <ion-list-header>Chats</ion-list-header> -->
           <ion-note>Your chats are listed below</ion-note>
 
           <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
@@ -11,16 +13,28 @@
               <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
               <ion-label>{{ p.title }}</ion-label>
             </ion-item>
+            
+            <ion-item lines="none" detail="false" routerLinkActive="selected" class="new-chat-button">
+              <ion-icon slot="start" name="add-outline"></ion-icon>
+            <ion-label>New chat</ion-label>
+            </ion-item>
           </ion-menu-toggle>
+
+          <!-- <ion-button fill="clear">
+            <ion-icon slot="start" name="add-outline"></ion-icon>
+            <ion-label>New chat</ion-label>
+          </ion-button> -->
         </ion-list>
 
         <ion-list id="labels-list">
           <ion-list-header>Created by</ion-list-header>
 
+          <a href="https://github.com/Gacrucis" target="_blank">
           <ion-item *ngFor="let label of labels" lines="none">
-            <ion-icon aria-hidden="true" slot="start" ios="heart-outline" md="heart-sharp"></ion-icon>
-            <ion-label>{{ label }}</ion-label>
-          </ion-item>
+              <ion-icon class="credits-icon" aria-hidden="true" slot="start" ios="heart-outline" md="heart-sharp"></ion-icon>
+              <ion-label>{{ label }}</ion-label>
+            </ion-item>
+          </a>
         </ion-list>
       </ion-content>
     </ion-menu>
