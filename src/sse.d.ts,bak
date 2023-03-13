@@ -1,0 +1,30 @@
+declare module 'sse' {
+  class SSE {
+    constructor(url: string, options?: {
+      headers?: Record<string, string>,
+      payload?: string,
+      method?: string,
+      withCredentials?: boolean,
+    });
+
+    readonly INITIALIZING: number;
+    readonly CONNECTING: number;
+    readonly OPEN: number;
+    readonly CLOSED: number;
+
+    url: string;
+    headers: Record<string, string>;
+    payload: string;
+    method: string;
+    withCredentials: boolean;
+
+    addEventListener(type: string, listener: (event: any) => void): void;
+    removeEventListener(type: string, listener: (event: any) => void): void;
+    dispatchEvent(event: any): boolean;
+
+    stream(): void;
+    close(): void;
+  }
+
+  export default SSE;
+}
