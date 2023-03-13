@@ -122,6 +122,10 @@ ion-item {
   --box-shadow: 0;
 }
 
+.separator {
+  width: 90%;
+  background-color: rgba(255, 255, 255, 0.623);
+}
 
 // Scrollbars ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ::-webkit-scrollbar {

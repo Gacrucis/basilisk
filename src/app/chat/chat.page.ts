@@ -2,7 +2,6 @@ import { AiService, Message } from './../services/ai/ai.service';
 import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterStateSnapshot } from '@angular/router';
 import { ChatSession } from '../app.component';
-import { IonButton } from '@ionic/angular';
 
 interface ChatCompletionChunk {
   id: string;
@@ -19,6 +18,11 @@ interface ChatCompletionChunk {
   }[];
 }
 
+interface LocalStorageSession {
+  firstMessageIndex: number;
+  messages: Message[];
+}
+
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.page.html',
@@ -27,12 +31,14 @@ interface ChatCompletionChunk {
 })
 export class chatPage implements OnInit {
   public id!: string;
+  public firstMessageIndex = 0;
   public messages: Message[] = [];
   public lst!: string[];
   private isLoading = false;
   private hasManuallyScrolled = false;
   private maxTokenUsage = 3096;
   private lastMessageId! : string;
+  private whiteHighlight = '#ffffff40';
 
   @ViewChild('textbox', { static: false }) textbox!: ElementRef;
   @ViewChild('conversation', { static: false }) conversation!: ElementRef;
@@ -42,7 +48,18 @@ export class chatPage implements OnInit {
 
   ngOnInit() {
     this.id = this.activatedRoute.snapshot.paramMap.get('id') as string;
-    this.messages = localStorage.getItem(this.id) ? JSON.parse(localStorage.getItem(this.id) as string) : [];
+    const data = localStorage.getItem(this.id);
+
+    
+    if (!data || data == '[]'){
+      this.saveSessionData();
+      return
+    }
+    
+    let parsedData = JSON.parse(data) as LocalStorageSession;
+
+    this.messages = parsedData.messages;
+    this.firstMessageIndex = parsedData.firstMessageIndex;
   }
 
   ngAfterViewInit() {
@@ -121,9 +138,36 @@ export class chatPage implements OnInit {
     setTimeout(() => {
       textBoxNative.focus();
       this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
-      // this.addCopyButton()
-    }, 100);
 
+      if (this.firstMessageIndex != 0){
+        this.showFirstMessage();
+      }
+    }, 100);
+    
+  }
+
+  showFirstMessage() {
+    const messageBubbles = document.querySelectorAll(".message-bubble");
+    const lastBubble = messageBubbles[this.firstMessageIndex - 1] as HTMLElement;
+    lastBubble.style.borderBottom = `1px solid ${this.whiteHighlight}`;
+  }
+
+  getSessionData() {
+    const chatSession : LocalStorageSession = {
+      firstMessageIndex: this.firstMessageIndex,
+      messages: this.messages
+    } 
+
+    return chatSession;
+  }
+
+  saveSessionData() {
+    localStorage.setItem(this.id, JSON.stringify(this.getSessionData()));
+  }
+
+  extractContext() : Message[] {
+    let messagesContext = this.messages.slice(this.firstMessageIndex)
+    return messagesContext;
   }
 
   handleExample() {
@@ -142,8 +186,15 @@ export class chatPage implements OnInit {
 
   handleClearAction() {
     this.handleStopAction();
-    localStorage.clear();
-    this.messages = [];
+    // this.firstMessageIndex = this.messages? this.messages.length - 1 : 0;
+    
+    if (this.firstMessageIndex == this.messages.length){
+      return;
+    }
+
+    this.firstMessageIndex = this.messages.length;
+    this.saveSessionData();
+    this.showFirstMessage();
   }
 
   async handleSentAction() {
@@ -162,14 +213,17 @@ export class chatPage implements OnInit {
     this.textbox.nativeElement.value = '';
 
     this.messages.push(userMessage);
+    this.saveSessionData();
+
     this.messages.push(AImessage);
+
     this.isLoading = true;
     this.hasManuallyScrolled = false;
     let currentId : string = '';
 
     try {
 
-      await this.AiService.callAPI(this.pruneMessages([this.AiService.getSystemMessage(), ...this.messages.slice(0, -1)]),
+      await this.AiService.callAPI(this.pruneMessages([this.AiService.getSystemMessage(), ...this.extractContext().slice(0, -1)]),
         (pe: ProgressEvent) => {
           if (!this.isLoading) {
             return
@@ -247,7 +301,7 @@ export class chatPage implements OnInit {
       return;
     }
 
-    localStorage.setItem(this.id, JSON.stringify(this.messages));
+    this.saveSessionData();
     await this.addTitle()
 
   }
@@ -342,7 +396,7 @@ export class chatPage implements OnInit {
     }
 
     const originalColor = buttonParent.style.backgroundColor;
-    buttonParent.style.backgroundColor = '#ffffff40';
+    buttonParent.style.backgroundColor = this.whiteHighlight;
     buttonParent.style.transition = 'background-color 0.5s ease-out';
     setTimeout(() => {
       buttonParent.style.backgroundColor = originalColor;
@@ -426,18 +480,11 @@ export class chatPage implements OnInit {
     let chatSessionsRaw = localStorage.getItem('chatSessions');
     let chatSessions: ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
 
-    // console.log(localStorage.getItem('chatSessions'));
-    // console.log(chatSessions);
-    // console.log(routeId);
-
     if (chatSessions && !chatSessions.find(x => x.id === routeId)) {
-      // console.log(localStorage.getItem(routeId));
       console.log('NO HAY');
       return false;
     }
 
-    // console.log(localStorage.getItem(routeId));
-    // return false;
     return true;
   }
 
