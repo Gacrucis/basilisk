@@ -23,8 +23,8 @@ interface ChatCompletionChunk {
   encapsulation: ViewEncapsulation.None
 })
 export class chatPage implements OnInit {
-  public chat!: string;
-  public messages: Message[] = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages') as string) : [];
+  public id!: string;
+  public messages: Message[] = [];
   public lst!: string[];
   private isLoading = false;
   private hasManuallyScrolled = false;
@@ -35,7 +35,8 @@ export class chatPage implements OnInit {
   constructor(private activatedRoute: ActivatedRoute, private AiService: AiService) { }
 
   ngOnInit() {
-    this.chat = this.activatedRoute.snapshot.paramMap.get('id') as string;
+    this.id = this.activatedRoute.snapshot.paramMap.get('id') as string;
+    this.messages = localStorage.getItem(this.id) ? JSON.parse(localStorage.getItem(this.id) as string) : [];
   }
 
   ngAfterViewInit() {
@@ -127,7 +128,11 @@ export class chatPage implements OnInit {
           const rawData = newReturnedData[index++].trim();
           console.log(rawData);
 
-          if (!rawData || rawData === '[DONE]') {
+          if (!rawData) {
+            return;
+          }
+
+          if (rawData === '[DONE]'){
             console.log('Finished stream');
             this.isLoading = false;
             return;
@@ -144,13 +149,13 @@ export class chatPage implements OnInit {
       }
     );
 
-    localStorage.setItem('messages', JSON.stringify(this.messages));
+    localStorage.setItem(this.id, JSON.stringify(this.messages));
 
   }
 
   processText(text: string) {
-    const codeRegex = /```(.*)\n([\s\S]+?)```/g;
-    const incompleteCodeRegex = /```(.+)\n([\S\s]+)/g;
+    const codeRegex = /```(.*)\n*([\s\S]+?)```/g;
+    const incompleteCodeRegex = /```(.*)\n([\S\s]+)/g;
     const newlineRegex  = /\n/g;
     
     const codeReplacement = '<div class="code"> <div class="code-header">$1</div> <div class="code-content">$2</div> </div>';

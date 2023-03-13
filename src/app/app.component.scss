@@ -151,3 +151,14 @@ a {
 .new-chat-button:hover {
   --background: #ffffff0e !important;
 }
+
+.custom-button {
+  // margin: 10px;
+  --background: transparent;
+  --color: rgba(255, 255, 255, 0.623);
+  --box-shadow: 0;
+}
+
+.chat-button-container {
+  cursor: pointer;
+}
