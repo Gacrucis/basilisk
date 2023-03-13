@@ -35,6 +35,36 @@ To install CruxAI, follow these steps:
 
 CruxAI is currently limited to text-based inputs and outputs. I plan to add theme support
 
+## Roadmap
+
+- [x] Implement the basic chat app with OpenAI's API ✔️ 
+
+- [x] Implement stream mode for chat API 🌊 
+
+- [x] Add a stop button 🛑 
+
+- [x] Add a scroll to bottom button 🚀 
+
+- [x] Add a clear chat button 🧹 
+
+- [x] Add a delete chat button ❌ 
+
+- [x] Implement multiple chat support 💬💬 
+
+- [ ] Add a configuration for custom APIKEY, temperature, model selector, max response tokens and max prompt tokens ⚙️ 
+
+- [ ] Add a copy button for code blocks 📋 
+
+- [ ] Add syntax highlighting for code blocks 🌈 
+
+- [ ] Support for image API 🖼️ 
+
+- [ ] Support for audio API 🎧
+
+# TODO
+
+- [ ] Stop the underlying chat div to trigger onclick when clicking close button
+
 ## Contributing
 
 If you find a bug or have a feature suggestion, please create an issue or submit a pull request.
