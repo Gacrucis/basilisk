@@ -88,7 +88,9 @@ export class chatPage implements OnInit {
     setTimeout(() => {
       textBoxNative.focus();
       this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
+      // this.addCopyButton()
     }, 100);
+
 
   }
   
@@ -103,6 +105,7 @@ export class chatPage implements OnInit {
 
   handleStopAction() {
     this.isLoading = false;
+    this.addCopyButton()
   }
 
   handleClearAction() {
@@ -185,6 +188,7 @@ export class chatPage implements OnInit {
 
   }
 
+  // TODO: There is a more efficient way to do this, but i was too lazy
   pruneMessages(messages: Message[]): Message[] {
     let totalWords = 0;
 
@@ -221,7 +225,28 @@ export class chatPage implements OnInit {
     processedText = processedText.replace(incompleteCodeRegex, codeReplacement);
     processedText = processedText.replace('<div class="code-header"></div>', '<div class="code-header">code</div>');
 
+    // this.addCopyButton()
     return processedText;
+  }
+
+  addCopyButton() {
+    // const elements = document.querySelectorAll('.code-header');
+    const elements = document.querySelectorAll('.user-bubble');
+
+    elements.forEach((element) => {
+      if (!element.hasAttribute('data-button-added')) {
+        let button = document.createElement('ion-button');
+        button.textContent = 'Click me';
+        
+        // Add event listener to button here...
+        button.addEventListener('click', () => {
+          alert('Button clicked!');
+        });
+        // element.append(button);
+        // element.insertAdjacentHTML('afterend', '<ion-button>Click me</ion-button>');
+        element.setAttribute('data-button-added', 'true');
+      }
+    });
   }
 
   canDeactivate(nextRoute : RouterStateSnapshot): boolean {
@@ -235,7 +260,7 @@ export class chatPage implements OnInit {
 
     if (chatSessions && !chatSessions.find(x => x.id === routeId)) {
       // console.log(localStorage.getItem(routeId));
-      console.log('NO HAY');
+      // console.log('NO HAY');
       return false;
     }
 
