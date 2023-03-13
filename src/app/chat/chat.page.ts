@@ -26,7 +26,11 @@ export class chatPage implements OnInit {
   public chat!: string;
   public messages: Message[] = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages') as string) : [];
   public lst!: string[];
+  private isLoading = false;
+  private hasManuallyScrolled = true;
+
   @ViewChild('textbox', { static: false }) textbox!: ElementRef;
+  @ViewChild('conversation', { static: false }) conversation!: ElementRef;
 
   constructor(private activatedRoute: ActivatedRoute, private AiService: AiService) { }
 
@@ -38,7 +42,7 @@ export class chatPage implements OnInit {
       element.style.height = height;
       let max = 300;
 
-      setInterval(() => {
+      setTimeout(() => {
         element.focus();
       }, 100);
 
@@ -54,6 +58,16 @@ export class chatPage implements OnInit {
       }, 100);
 
     }
+
+    this.conversation.nativeElement.addEventListener('scroll', () => {
+      this.hasManuallyScrolled = true;
+    });
+
+    setInterval(() => {
+      if (this.isLoading && !this.hasManuallyScrolled){
+        this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
+      }
+    }, 100);
 
   }
 
@@ -73,6 +87,8 @@ export class chatPage implements OnInit {
 
     await this.AiService.callAPI(this.messages.slice(0, -1),
       (pe: ProgressEvent) => {
+        this.isLoading = true;
+        this.hasManuallyScrolled = true;
         const target = pe.target as any;
 
         const res = target['response'];
@@ -85,6 +101,7 @@ export class chatPage implements OnInit {
 
           if (!rawData || rawData === '[DONE]') {
             console.log('Finished stream');
+            this.isLoading = false;
             return;
           }
 
@@ -104,11 +121,15 @@ export class chatPage implements OnInit {
   }
 
   processText(text: string) {
-    const codeRegex = /```(.+)\n([\s\S]+?)```/g;
+    const codeRegex = /```(.*)\n([\s\S]+?)```/g;
+    const incompleteCodeRegex = /```(.+)\n([\S\s]+)/g;
     const newlineRegex  = /\n/g;
     var processedText = text;
-    // processedText = processedText.replace(codeRegex, '<ion-card class="code"><ion-card-header>$1</ion-card-header><ion-card-content>$2</ion-card-content></ion-card>');
-    processedText = processedText.replace(codeRegex, '<div class="code-header">$1</div> <div class="code">$2</div>');
+
+    processedText = processedText.replace(codeRegex, '<div class="code"> <div class="code-header">$1</div> <div class="code-content">$2</div> </div>');
+    processedText = processedText.replace(incompleteCodeRegex, '<div class="code"> <div class="code-header">$1</div> <div class="code-content">$2</div> </div>');
+    // processedText = processedText.replace(incompleteCodeRegex, '<div class="code-header">$1</div> <div class="code">$2</div>');
+    processedText = processedText.replace('<div class="code-header"></div>', '<div class="code-header">code</div>');
     // processedText = processedText.replace(newlineRegex, '<br />');
 
     return processedText;
