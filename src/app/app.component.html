@@ -10,9 +10,9 @@
 
           <ion-menu-toggle auto-hide="false">
             <div class="chat-button-container">
-              <ion-item  lines="none" detail="false" routerLinkActive="selected">
+              <ion-item  lines="none" detail="false" routerDirection="root" [routerLink]="[getDefaultChatSession().url]" routerLinkActive="selected">
                 <ion-icon aria-hidden="true" slot="start" [ios]="getDefaultChatSession().icon + '-outline'" [md]="getDefaultChatSession().icon + '-sharp'"></ion-icon>
-                <ion-label routerDirection="root" [routerLink]="[getDefaultChatSession().url]" >Default chat</ion-label>
+                <ion-label>Default chat</ion-label>
               </ion-item>
 
               <!-- <ion-button class="custom-button"></ion-button> -->
@@ -22,10 +22,10 @@
 
           <ion-menu-toggle auto-hide="false" *ngFor="let p of getNonDefaultChatSessions(); let i = index">
             <div class="chat-button-container">
-              <ion-item  lines="none" detail="false" routerLinkActive="selected">
+              <ion-item  lines="none" detail="false" routerDirection="root" [routerLink]="[p.url]" routerLinkActive="selected">
                 <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
-                <ion-label routerDirection="root" [routerLink]="[p.url]" >Chat {{ p.id }}</ion-label>
-                <ion-button class="custom-button" (click)="handleDeleteChatAction(p.id)">
+                <ion-label>Chat {{ p.id }}</ion-label>
+                <ion-button class="custom-button" (click)="handleDeleteChatAction(p.id, $event)">
                   <ion-icon slot="icon-only" name="close-outline"></ion-icon>
                 </ion-button>
               </ion-item>
@@ -40,10 +40,13 @@
           <ion-label>New chat</ion-label>
           </ion-item>
 
-          <!-- <ion-button fill="clear">
-            <ion-icon slot="start" name="add-outline"></ion-icon>
-            <ion-label>New chat</ion-label>
-          </ion-button> -->
+          <br>
+
+          <ion-item lines="none" detail="false" routerLinkActive="selected" class="new-chat-button" (click)="handleNewChatAction(generateRandomId())">
+            <ion-icon slot="start" name="cog-outline"></ion-icon>
+          <ion-label>Configuration</ion-label>
+          </ion-item>
+
         </ion-list>
 
         <ion-list id="labels-list">

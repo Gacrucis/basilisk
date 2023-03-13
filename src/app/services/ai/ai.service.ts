@@ -12,8 +12,8 @@ export interface Message {
 })
 export class AiService {
   private model: string = 'gpt-3.5-turbo-0301';
-  private temperature: number = 0.5;
-  private max_tokens: number = 128;
+  private temperature: number = 1;
+  private maxTokens: number = 1024;
   private user: string = 'Gacrucis';
   private api = new OpenAIApi(new Configuration({apiKey: environment.OPENAI_SECRET}));
 
@@ -22,7 +22,7 @@ export class AiService {
   private getBody(messages: any) {
     return {
       "messages": messages,
-      "max_tokens": this.max_tokens,
+      "max_tokens": this.maxTokens,
       "temperature": this.temperature,
       "n": 1,
       "stream": true,
@@ -41,6 +41,10 @@ export class AiService {
       }
     );
 
+  }
+
+  public getMaximumTokens() : number {
+    return this.maxTokens;
   }
 
 }
