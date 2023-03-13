@@ -52,6 +52,10 @@ export class AppComponent implements OnChanges{
     return Math.floor(Math.random() * 10000).toString();
   }
 
+  handleConfigAction() {
+    alert('Work in progress! 💻');
+  }
+
   handleSelectChatAction(chatId: string) {
     this.currentChatId = chatId;
     this.router.navigateByUrl(`/chat/${chatId}`);

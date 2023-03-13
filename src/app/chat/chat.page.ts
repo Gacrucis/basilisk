@@ -2,6 +2,7 @@ import { AiService, Message } from './../services/ai/ai.service';
 import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterStateSnapshot } from '@angular/router';
 import { ChatSession } from '../app.component';
+import { IonButton } from '@ionic/angular';
 
 interface ChatCompletionChunk {
   id: string;
@@ -34,6 +35,7 @@ export class chatPage implements OnInit {
 
   @ViewChild('textbox', { static: false }) textbox!: ElementRef;
   @ViewChild('conversation', { static: false }) conversation!: ElementRef;
+  @ViewChild('downButton', { static: false, read: ElementRef  }) downButton!: ElementRef;
 
   constructor(private activatedRoute: ActivatedRoute, private AiService: AiService, private router: Router) { }
 
@@ -45,8 +47,8 @@ export class chatPage implements OnInit {
   ngAfterViewInit() {
 
     let chatSessionsRaw = localStorage.getItem('chatSessions');
-    let chatSessions : ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
-    
+    let chatSessions: ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
+
     if (chatSessions && !chatSessions.find(x => x.id === this.id)) {
       this.router.navigateByUrl('/chat/default');
     }
@@ -58,7 +60,33 @@ export class chatPage implements OnInit {
       textBoxNative.style.height = height;
       let max = 300;
 
-      setInterval(() => {
+      textBoxNative.addEventListener('keydown', (event: KeyboardEvent) => {
+        const inputValue = textBoxNative.value.trim();
+        const key = event.key;
+
+        // Check for empty space or newline character
+        if ((key === ' ' || key === 'Enter') && !inputValue) {
+          event.preventDefault();
+        }
+      });
+
+      textBoxNative.addEventListener('input', () => {
+        const textValue : string = textBoxNative.value;
+
+        if (textValue.charAt(0) == '\n'){
+          textBoxNative.value = textValue.substring(1);
+        }
+      });
+
+      textBoxNative.addEventListener('input', () => {
+        const textValue : string = textBoxNative.value;
+
+        if (textValue.charAt(0) == '\n'){
+          textBoxNative.value = textValue.substring(1);
+        }
+      });
+
+      textBoxNative.addEventListener('input', () => {
         textBoxNative.style.height = height;
         textBoxNative.style.height = (textBoxNative.scrollHeight > max ? max : textBoxNative.scrollHeight) + 'px';
 
@@ -67,7 +95,11 @@ export class chatPage implements OnInit {
         } else {
           textBoxNative.style.overflowY = 'hidden';
         }
-      }, 100);
+
+        let downButtonNative = this.downButton.nativeElement;
+        downButtonNative.style.bottom = (parseInt(textBoxNative.style.height) + 10) + 'px';
+
+      });
 
     }
 
@@ -80,7 +112,7 @@ export class chatPage implements OnInit {
     }, { passive: true });
 
     setInterval(() => {
-      if (this.isLoading && !this.hasManuallyScrolled){
+      if (this.isLoading && !this.hasManuallyScrolled) {
         this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
       }
     }, 100);
@@ -93,8 +125,8 @@ export class chatPage implements OnInit {
 
 
   }
-  
-  handleExample(){
+
+  handleExample() {
     alert('hola');
   }
 
@@ -128,7 +160,7 @@ export class chatPage implements OnInit {
     const AImessage = { role: 'assistant', content: '' };
     let index = 0;
     this.textbox.nativeElement.value = '';
-    
+
     this.messages.push(userMessage);
     this.messages.push(AImessage);
     this.isLoading = true;
@@ -137,53 +169,53 @@ export class chatPage implements OnInit {
     try {
 
       await this.AiService.callAPI(this.pruneMessages(this.messages.slice(0, -1)),
-      (pe: ProgressEvent) => {
-        if (!this.isLoading){
-          return
+        (pe: ProgressEvent) => {
+          if (!this.isLoading) {
+            return
+          }
+
+          const target = pe.target as any;
+
+          const res = target['response'];
+          const newReturnedData = res.split('data:');
+          const newIndex = newReturnedData.length - 1;
+
+          while (index <= newIndex) {
+            const rawData = newReturnedData[index++].trim();
+            console.log(rawData);
+
+            if (!rawData) {
+              this.isLoading = true;
+              return;
+            }
+
+            if (rawData === '[DONE]') {
+              console.log('Finished stream');
+              this.isLoading = false;
+              return;
+            }
+
+            const data = JSON.parse(rawData) as ChatCompletionChunk;
+
+            if (data.hasOwnProperty('error')) {
+              this.messages.push({ role: 'assistant', content: '```API error\n' + JSON.stringify(data.error, null, 2) + '```' });
+              return;
+            }
+
+            const chunkContent = data.choices[0]?.delta.content;
+
+            if (chunkContent) {
+              AImessage.content += chunkContent;
+            }
+          }
+
         }
-        
-        const target = pe.target as any;
-        
-        const res = target['response'];
-        const newReturnedData = res.split('data:');
-        const newIndex = newReturnedData.length - 1;
-
-        while (index <= newIndex) {
-          const rawData = newReturnedData[index++].trim();
-          console.log(rawData);
-
-          if (!rawData) {
-            this.isLoading = true;
-            return;
-          }
-          
-          if (rawData === '[DONE]'){
-            console.log('Finished stream');
-            this.isLoading = false;
-            return;
-          }
-
-          const data = JSON.parse(rawData) as ChatCompletionChunk;
-
-          if (data.hasOwnProperty('error')) {
-            this.messages.push({ role: 'assistant', content: '```API error\n' + JSON.stringify(data.error, null, 2) + '```' });
-            return;
-          }
-          
-          const chunkContent = data.choices[0]?.delta.content;
-          
-          if (chunkContent) {
-            AImessage.content += chunkContent;
-          }
-        }
-
-      }
       );
     } catch (error) {
       this.messages.push({ role: 'assistant', content: '```error\n' + error + '```' });
       return;
     }
-      
+
     localStorage.setItem(this.id, JSON.stringify(this.messages));
 
   }
@@ -196,7 +228,7 @@ export class chatPage implements OnInit {
       const words = message.content.trim().split(/\s+/);
       totalWords += words.length;
     }
-    
+
     let allotedTokens = this.maxTokenUsage - this.AiService.getMaximumTokens();
 
     let prevTokens = Math.round(totalWords * 1.5);
@@ -204,7 +236,7 @@ export class chatPage implements OnInit {
     if (prevTokens > allotedTokens) {
       console.log('Too many tokens!');
       return this.pruneMessages(messages.slice(1));
-      
+
     }
 
     return messages;
@@ -212,15 +244,15 @@ export class chatPage implements OnInit {
 
   processText(text: string) {
     var processedText = text;
-    
+
     // Prevenir que se renderize HTML
     processedText = processedText.replace(/</g, '<span><</span>');
-    
+
     // Cuadros especiales para codigo
     const incompleteCodeRegex = /```(.*)\n*([\S\s]+)/g;
     const codeRegex = /```(.*)\n*([\s\S]+?)```/g;
     const codeReplacement = '<div class="code"> <div class="code-header">$1</div> <div class="code-content">$2</div></div>';
-    
+
     processedText = processedText.replace(codeRegex, codeReplacement);
     processedText = processedText.replace(incompleteCodeRegex, codeReplacement);
     processedText = processedText.replace('<div class="code-header"></div>', '<div class="code-header">code</div>');
@@ -237,7 +269,7 @@ export class chatPage implements OnInit {
       if (!element.hasAttribute('data-button-added')) {
         let button = document.createElement('ion-button');
         button.textContent = 'Click me';
-        
+
         // Add event listener to button here...
         button.addEventListener('click', () => {
           alert('Button clicked!');
@@ -249,10 +281,10 @@ export class chatPage implements OnInit {
     });
   }
 
-  canDeactivate(nextRoute : RouterStateSnapshot): boolean {
-    let routeId : string = nextRoute.url.split('/').slice(-1)[0];
+  canDeactivate(nextRoute: RouterStateSnapshot): boolean {
+    let routeId: string = nextRoute.url.split('/').slice(-1)[0];
     let chatSessionsRaw = localStorage.getItem('chatSessions');
-    let chatSessions : ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
+    let chatSessions: ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
 
     console.log(localStorage.getItem('chatSessions'));
     console.log(chatSessions);

@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  OPENAI_SECRET: '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',
+  OPENAI_SECRET: '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',
 };
 
 /*

@@ -63,6 +63,8 @@ CruxAI is currently limited to text-based inputs and outputs. I plan to add them
 
 # TODO
 
+- [x] Dont remove newlines on chat send
+
 - [ ] Stop the underlying chat div to trigger onclick when clicking close button
 
 ## Contributing
