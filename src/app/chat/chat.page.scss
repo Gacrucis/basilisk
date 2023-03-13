@@ -50,6 +50,52 @@ ion-menu-button {
   --box-shadow: 0;
 }
 
+.bubble-container {
+  display: flex;
+  // flex-direction: row;
+}
+
+.message-bubble {
+  max-width: 80%;
+}
+
+.user-bubble {
+  background-color: rgba(255, 255, 255, 0.089);
+  border-radius: 10px;
+  padding: 10px;
+  // margin: 10px;
+  // max-width: 80%;
+  // align-self: flex-end;
+  // text-align: right;
+  margin-left: auto;
+}
+
+.assistant-bubble {
+  padding: 10px;
+}
+
+p {
+  margin: 0;
+}
+
+.code {
+  background-color: #1e2227;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 10px;
+  // align-self: flex-end;
+  // text-align: right;
+  white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+ion-item {
+  --background: transparent;
+  // --color: rgba(255, 255, 255, 0.623);
+  --box-shadow: 0;
+}
+
+
 // Scrollbars ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ::-webkit-scrollbar {
 width: 10px;

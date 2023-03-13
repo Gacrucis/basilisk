@@ -1,5 +1,5 @@
-import { AiService } from './../services/ai/ai.service';
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { AiService, Message } from './../services/ai/ai.service';
+import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 interface ChatCompletionChunk {
@@ -20,11 +20,13 @@ interface ChatCompletionChunk {
   selector: 'app-chat',
   templateUrl: './chat.page.html',
   styleUrls: ['./chat.page.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class chatPage implements OnInit {
   public chat!: string;
+  public messages: Message[] = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages') as string) : [];
   public lst!: string[];
-  @ViewChild('textbox', {static: false}) textbox!: ElementRef;
+  @ViewChild('textbox', { static: false }) textbox!: ElementRef;
 
   constructor(private activatedRoute: ActivatedRoute, private AiService: AiService) { }
 
@@ -45,9 +47,9 @@ export class chatPage implements OnInit {
         element.style.height = (element.scrollHeight > max ? max : element.scrollHeight) + 'px';
 
         if (element.scrollHeight > max) {
-            element.style.overflowY = 'scroll';
+          element.style.overflowY = 'scroll';
         } else {
-            element.style.overflowY = 'hidden';
+          element.style.overflowY = 'hidden';
         }
       }, 100);
 
@@ -61,22 +63,55 @@ export class chatPage implements OnInit {
   }
 
   async handleSendButton() {
-    const result = await this.AiService.callAPI({}, 
+    const userMessage = { role: 'user', content: this.textbox.nativeElement.value };
+    const AImessage = { role: 'assistant', content: '' };
+    let index = 0;
+    this.textbox.nativeElement.value = '';
+    
+    this.messages.push(userMessage);
+    this.messages.push(AImessage);
+
+    await this.AiService.callAPI(this.messages.slice(0, -1),
       (pe: ProgressEvent) => {
         const target = pe.target as any;
+
         const res = target['response'];
         const newReturnedData = res.split('data:');
-        let lastPart = newReturnedData[newReturnedData.length - 1];
-        lastPart = lastPart.trim()
+        const newIndex = newReturnedData.length - 1;
 
-        if (lastPart == '[DONE]') {
-          console.log('Finished stream');
-          return
+        while (index <= newIndex) {
+          const rawData = newReturnedData[index++].trim();
+          console.log(rawData);
+
+          if (!rawData || rawData === '[DONE]') {
+            console.log('Finished stream');
+            return;
+          }
+
+          const { choices } = JSON.parse(rawData) as ChatCompletionChunk;
+          const chunkContent = choices[0]?.delta.content;
+
+          if (chunkContent) {
+            AImessage.content += chunkContent;
+          }
         }
 
-        console.log(JSON.parse(lastPart));
       }
     );
+
+    localStorage.setItem('messages', JSON.stringify(this.messages));
+
+  }
+
+  processText(text: string) {
+    const codeRegex = /```(.+)\n([\s\S]+?)```/g;
+    const newlineRegex  = /\n/g;
+    var processedText = text;
+    // processedText = processedText.replace(codeRegex, '<ion-card class="code"><ion-card-header>$1</ion-card-header><ion-card-content>$2</ion-card-content></ion-card>');
+    processedText = processedText.replace(codeRegex, '<div class="code-header">$1</div> <div class="code">$2</div>');
+    // processedText = processedText.replace(newlineRegex, '<br />');
+
+    return processedText;
   }
 
 }
