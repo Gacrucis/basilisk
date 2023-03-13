@@ -240,7 +240,8 @@ export class chatPage implements OnInit {
     }
 
     // console.log(localStorage.getItem(routeId));
-    return false;
+    // return false;
+    return true;
   }
 
 }
