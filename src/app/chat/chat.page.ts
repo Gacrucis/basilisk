@@ -27,12 +27,16 @@ export class chatPage implements OnInit {
   public messages: Message[] = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages') as string) : [];
   public lst!: string[];
   private isLoading = false;
-  private hasManuallyScrolled = true;
+  private hasManuallyScrolled = false;
 
   @ViewChild('textbox', { static: false }) textbox!: ElementRef;
   @ViewChild('conversation', { static: false }) conversation!: ElementRef;
 
   constructor(private activatedRoute: ActivatedRoute, private AiService: AiService) { }
+
+  ngOnInit() {
+    this.chat = this.activatedRoute.snapshot.paramMap.get('id') as string;
+  }
 
   ngAfterViewInit() {
     var element = this.textbox.nativeElement;
@@ -41,10 +45,6 @@ export class chatPage implements OnInit {
     if (element != null) {
       element.style.height = height;
       let max = 300;
-
-      setTimeout(() => {
-        element.focus();
-      }, 100);
 
       setInterval(() => {
         element.style.height = height;
@@ -69,14 +69,38 @@ export class chatPage implements OnInit {
       }
     }, 100);
 
+    setTimeout(() => {
+      element.focus();
+      this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
+    }, 100);
+
   }
 
-  ngOnInit() {
-    this.chat = this.activatedRoute.snapshot.paramMap.get('id') as string;
-    this.lst = new Array(20).fill('a');
+  handleDownAction() {
+    this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
+    this.hasManuallyScrolled = false;
   }
 
-  async handleSendButton() {
+  handleStopAction() {
+    this.isLoading = false;
+  }
+
+  handleClearAction() {
+    this.handleStopAction();
+    localStorage.clear();
+    this.messages = [];
+  }
+
+  async handleSentAction() {
+    if (this.isLoading) {
+      return;
+    }
+
+    if (!this.textbox.nativeElement.value.trim()) {
+      this.textbox.nativeElement.value = 'as';
+      return;
+    }
+
     const userMessage = { role: 'user', content: this.textbox.nativeElement.value };
     const AImessage = { role: 'assistant', content: '' };
     let index = 0;
@@ -84,10 +108,14 @@ export class chatPage implements OnInit {
     
     this.messages.push(userMessage);
     this.messages.push(AImessage);
+    this.isLoading = true;
 
     await this.AiService.callAPI(this.messages.slice(0, -1),
       (pe: ProgressEvent) => {
-        this.isLoading = true;
+        if (!this.isLoading){
+          return
+        }
+
         this.hasManuallyScrolled = true;
         const target = pe.target as any;
 
@@ -124,11 +152,14 @@ export class chatPage implements OnInit {
     const codeRegex = /```(.*)\n([\s\S]+?)```/g;
     const incompleteCodeRegex = /```(.+)\n([\S\s]+)/g;
     const newlineRegex  = /\n/g;
+    
+    const codeReplacement = '<div class="code"> <div class="code-header">$1</div> <div class="code-content">$2</div> </div>';
+
     var processedText = text;
 
-    processedText = processedText.replace(codeRegex, '<div class="code"> <div class="code-header">$1</div> <div class="code-content">$2</div> </div>');
-    processedText = processedText.replace(incompleteCodeRegex, '<div class="code"> <div class="code-header">$1</div> <div class="code-content">$2</div> </div>');
-    // processedText = processedText.replace(incompleteCodeRegex, '<div class="code-header">$1</div> <div class="code">$2</div>');
+
+    processedText = processedText.replace(codeRegex, codeReplacement);
+    processedText = processedText.replace(incompleteCodeRegex, codeReplacement);
     processedText = processedText.replace('<div class="code-header"></div>', '<div class="code-header">code</div>');
     // processedText = processedText.replace(newlineRegex, '<br />');
 

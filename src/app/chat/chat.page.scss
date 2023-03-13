@@ -43,7 +43,7 @@ ion-menu-button {
   outline: none;
 }
 
-.send-button {
+.custom-button {
   margin: 10px;
   --background: transparent;
   --color: rgba(255, 255, 255, 0.623);
@@ -81,27 +81,32 @@ p {
 .code {
   background-color: #1e2227;
   font-family: 'Courier New', Courier, monospace;
+  width: fit-content;
   margin: 10px;
   border-radius: 10px;
 }
 
 .code-header {
   color: #E06C75;
-  // border-radius: 10px 10px 0 0;
   padding: 10px;
   padding-left: 20px;
-  
   margin-bottom: 0;
 }
 
 .code-content {
-  // border-radius: 0 0 10px 10px;
   padding: 20px;
-  // margin: 10px;
   margin-top: 0;
-  // align-self: flex-end;
-  // text-align: right;
   white-space: pre-wrap;
+}
+
+.right-buttons {
+  width: min-content;
+}
+
+.down-button {
+  position: absolute;
+  bottom: 110px;
+  right: 0px;
 }
 
 ion-item {

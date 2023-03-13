@@ -22,18 +22,33 @@
         <ion-list>
           <ion-item lines="none" class="bubble-container" *ngFor="let message of messages">
             <div class="message-bubble" [ngClass]="message.role === 'user' ? 'user-bubble' : 'assistant-bubble'" [innerHTML]="processText(message.content)">
-              <!-- <p> {{ message.content }} </p> -->
             </div>
           </ion-item>
         </ion-list>
 
+        <ion-button #downButton class="custom-button down-button" (click)="handleDownAction()">
+          <ion-icon slot="icon-only" name="chevron-down-outline"></ion-icon>
+        </ion-button>
+
       </div>
 
       <div class="prompt prompt-content">
-        <textarea #textbox class="textbox" placeholder="Type something here" (keydown.enter)="handleSendButton()"></textarea>
-        <ion-button class="send-button" (click)="handleSendButton()">
-          <ion-icon slot="icon-only" name="send-outline"></ion-icon>
-        </ion-button>
+        <div class="left-buttons">
+          <ion-button class="custom-button" (click)="handleClearAction()">
+            <ion-icon slot="icon-only" name="trash-bin-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+        <textarea #textbox class="textbox" placeholder="Type something here" (keydown.enter)="handleSentAction()"></textarea>
+
+        <div class="right-buttons">
+          <ion-button class="custom-button" (click)="handleSentAction()">
+            <ion-icon slot="icon-only" name="stop-outline"></ion-icon>
+          </ion-button>
+          <ion-button class="custom-button" (click)="handleSentAction()">
+            <ion-icon slot="icon-only" name="caret-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
       </div>
 
     </div>
