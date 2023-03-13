@@ -16,8 +16,14 @@ export class AiService {
   private maxTokens: number = 1024;
   private user: string = 'Gacrucis';
   private api = new OpenAIApi(new Configuration({apiKey: environment.OPENAI_SECRET}));
+  private systemMessage!: Message;
 
-  constructor() {}
+  constructor() {
+    this.systemMessage = {
+      role: 'user',
+      content: 'Write any example in code format with backticks followed by a newline. For example: ```\nprint("Hello World")\n```'
+    }
+  }
 
   private getBody(messages: any) {
     return {
@@ -45,6 +51,10 @@ export class AiService {
 
   public getMaximumTokens() : number {
     return this.maxTokens;
+  }
+
+  public getSystemMessage() : Message {
+    return this.systemMessage;
   }
 
 }

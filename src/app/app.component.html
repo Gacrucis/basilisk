@@ -22,9 +22,10 @@
 
           <ion-menu-toggle auto-hide="false" *ngFor="let p of getNonDefaultChatSessions(); let i = index">
             <div class="chat-button-container">
-              <ion-item  lines="none" detail="false" routerDirection="root" [routerLink]="[p.url]" routerLinkActive="selected">
+              <ion-item [id]="p.id" lines="none" detail="false" routerDirection="root" [routerLink]="[p.url]" routerLinkActive="selected">
                 <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
-                <ion-label>Chat {{ p.id }}</ion-label>
+                <ion-label *ngIf="p.title">{{ p.title }}</ion-label>
+                <ion-label *ngIf="!p.title">Chat {{ p.id }}</ion-label>
                 <ion-button class="custom-button" (click)="handleDeleteChatAction(p.id, $event)">
                   <ion-icon slot="icon-only" name="close-outline"></ion-icon>
                 </ion-button>

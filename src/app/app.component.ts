@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 
 export interface ChatSession {
   id: string;
+  title?: string;
   url: string;
   icon: string;
 }

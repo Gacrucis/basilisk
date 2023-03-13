@@ -32,6 +32,7 @@ export class chatPage implements OnInit {
   private isLoading = false;
   private hasManuallyScrolled = false;
   private maxTokenUsage = 3096;
+  private lastMessageId! : string;
 
   @ViewChild('textbox', { static: false }) textbox!: ElementRef;
   @ViewChild('conversation', { static: false }) conversation!: ElementRef;
@@ -123,7 +124,6 @@ export class chatPage implements OnInit {
       // this.addCopyButton()
     }, 100);
 
-
   }
 
   handleExample() {
@@ -165,10 +165,11 @@ export class chatPage implements OnInit {
     this.messages.push(AImessage);
     this.isLoading = true;
     this.hasManuallyScrolled = false;
+    let currentId : string = '';
 
     try {
 
-      await this.AiService.callAPI(this.pruneMessages(this.messages.slice(0, -1)),
+      await this.AiService.callAPI(this.pruneMessages([this.AiService.getSystemMessage(), ...this.messages.slice(0, -1)]),
         (pe: ProgressEvent) => {
           if (!this.isLoading) {
             return
@@ -182,7 +183,12 @@ export class chatPage implements OnInit {
 
           while (index <= newIndex) {
             const rawData = newReturnedData[index++].trim();
-            console.log(rawData);
+
+            // try {
+            //   console.log(JSON.parse(rawData));
+            // } catch (e) {
+            //   console.log(rawData);
+            // }
 
             if (!rawData) {
               this.isLoading = true;
@@ -191,21 +197,46 @@ export class chatPage implements OnInit {
 
             if (rawData === '[DONE]') {
               console.log('Finished stream');
-              this.isLoading = false;
+              // this.isLoading = false;
               return;
             }
 
             const data = JSON.parse(rawData) as ChatCompletionChunk;
-
+            
+            // Verifies if API has thrown an error
             if (data.hasOwnProperty('error')) {
-              this.messages.push({ role: 'assistant', content: '```API error\n' + JSON.stringify(data.error, null, 2) + '```' });
+              this.handleAPIError(data);
+              return;
+            }
+            
+            // If this is the first stream of data, set the current id
+            if (!currentId) {
+              this.lastMessageId = data.id;
+              currentId = data.id;
+            }
+
+            // console.log('data id: ' + data.id)
+            // console.log('lastMessage id: ' + this.lastMessageId)
+
+            // If the current id is different from the one in the stream, ignore the data
+            if (data.id != currentId || data.id != this.lastMessageId) {
+              console.log('Ignored old data')
+              return
+            }
+
+            // If the stream has finished, stop the completion
+            if (data.choices[0]?.finish_reason){
+              this.isLoading = false;
+              console.log('Stopped completion');
               return;
             }
 
+            // If it has not stopped, add text to the messagle bubble
             const chunkContent = data.choices[0]?.delta.content;
 
-            if (chunkContent) {
+            if (chunkContent && data.id == this.lastMessageId) {
               AImessage.content += chunkContent;
+              AImessage.content = AImessage.content.charAt(0).toUpperCase() + AImessage.content.slice(1);
             }
           }
 
@@ -217,6 +248,7 @@ export class chatPage implements OnInit {
     }
 
     localStorage.setItem(this.id, JSON.stringify(this.messages));
+    await this.addTitle()
 
   }
 
@@ -281,18 +313,126 @@ export class chatPage implements OnInit {
     });
   }
 
+  // Add title to chat on first message
+  async addTitle() {
+    // Search this chatSession in localStorage
+    var chatSessionsRaw = localStorage.getItem('chatSessions');
+    var chatSessions: ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
+    var chatIndex = chatSessions.findIndex(x => x.id == this.id);
+
+    if (chatIndex < 0 || chatSessions[chatIndex].title){
+      // console.log('Skipped chat title update');
+      return;
+    }
+
+    let chatButton = document.getElementById(`${this.id}`);
+
+    if (!chatButton){
+      return;
+    }
+
+    let chatButtonTitle = chatButton.querySelector('ion-label') as HTMLElement;
+    console.log(chatButtonTitle)
+    let firstPrompt = this.messages[0].content;
+
+    const buttonParent = chatButton.parentElement;
+
+    if (!buttonParent) {
+      return;
+    }
+
+    const originalColor = buttonParent.style.backgroundColor;
+    buttonParent.style.backgroundColor = '#ffffff40';
+    buttonParent.style.transition = 'background-color 0.5s ease-out';
+    setTimeout(() => {
+      buttonParent.style.backgroundColor = originalColor;
+    }, 1000);
+
+    // Limit firstPrompt to 10 words
+    // firstPrompt = firstPrompt.split(' ').slice(0, 10).join(' ');
+    // console.log(firstPrompt)
+    chatButtonTitle.textContent = '';
+    let chunkIndex = 0;
+    var text;
+    await this.AiService.callAPI(
+      [{'role' : 'user', 'content' : `you are a keyword generator, write one summary keyword with no dots or puctuation for: " ${firstPrompt}", use no more than 15 letters`}],
+      (pe: ProgressEvent) => {
+
+        const target = pe.target as any;
+
+          const res = target['response'];
+          const newReturnedData = res.split('data:');
+          const newIndex = newReturnedData.length - 1;
+
+          while (chunkIndex <= newIndex) {
+            const rawData = newReturnedData[chunkIndex++].trim();
+
+            if (!rawData){
+              // console.log('Started chat title stream');
+              return;
+            }
+
+            if (rawData === '[DONE]') {
+              // console.log('Finished chat title stream');
+              return;
+            }
+
+            const data = JSON.parse(rawData) as ChatCompletionChunk;
+            
+            // Verifies if API has thrown an error
+            if (data.hasOwnProperty('error')) {
+              this.handleAPIError(data);
+              return;
+            }
+            
+            const chunkContent = data.choices[0]?.delta.content;
+            // console.log(chunkContent)
+
+            if (chunkContent) {
+              text = chatButtonTitle.textContent + chunkContent;
+              
+              text = text.trim();
+              text = text.charAt(0).toUpperCase() + text.substring(1).toLowerCase();
+              text = text.replace(/\"/, '');
+              text = text.replace(/\./, '');
+              
+              chatButtonTitle.textContent = text;
+            }
+          }
+      }
+    )
+    
+    // Writing this again so i dont get blinsided by the async
+    console.log(`Adding title ${text} to chat ${this.id}`);
+    
+    var chatSessionsRaw = localStorage.getItem('chatSessions');
+    var chatSessions: ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
+    var chatIndex = chatSessions.findIndex(x => x.id == this.id);
+
+    chatSessions[chatIndex].title = text;
+    localStorage.setItem('chatSessions', JSON.stringify(chatSessions));
+
+    console.log(`Added title ${text} to chat ${this.id}`);
+  }
+
+  handleAPIError(data: ChatCompletionChunk) {
+    console.log(data.error);
+    this.messages.push({ role: 'assistant', content: '```API error\n' + JSON.stringify(data.error, null, 2) + '```' });
+  }
+
+  // Guard para evitar navegaciones a chats que no han sido creados
   canDeactivate(nextRoute: RouterStateSnapshot): boolean {
     let routeId: string = nextRoute.url.split('/').slice(-1)[0];
     let chatSessionsRaw = localStorage.getItem('chatSessions');
     let chatSessions: ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
 
-    console.log(localStorage.getItem('chatSessions'));
-    console.log(chatSessions);
-    console.log(routeId);
+    // console.log(localStorage.getItem('chatSessions'));
+    // console.log(chatSessions);
+    // console.log(routeId);
 
     if (chatSessions && !chatSessions.find(x => x.id === routeId)) {
       // console.log(localStorage.getItem(routeId));
-      // console.log('NO HAY');
+      console.log('NO HAY');
       return false;
     }
 
