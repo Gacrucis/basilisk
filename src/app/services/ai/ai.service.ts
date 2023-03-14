@@ -11,7 +11,7 @@ export interface Message {
   providedIn: 'root'
 })
 export class AiService {
-  private model: string = 'gpt-3.5-turbo-0301';
+  private model: string = 'gpt-3.5-turbo';
   private temperature: number = 1;
   private maxTokens: number = 1024;
   private user: string = 'Gacrucis';
