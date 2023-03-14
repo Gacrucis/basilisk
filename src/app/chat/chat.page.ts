@@ -2,6 +2,7 @@ import { AiService, Message } from './../services/ai/ai.service';
 import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterStateSnapshot } from '@angular/router';
 import { ChatSession } from '../app.component';
+import { ToastController } from '@ionic/angular';
 
 interface ChatCompletionChunk {
   id: string;
@@ -44,7 +45,7 @@ export class chatPage implements OnInit {
   @ViewChild('conversation', { static: false }) conversation!: ElementRef;
   @ViewChild('downButton', { static: false, read: ElementRef  }) downButton!: ElementRef;
 
-  constructor(private activatedRoute: ActivatedRoute, private AiService: AiService, private router: Router) { }
+  constructor(private activatedRoute: ActivatedRoute, private AiService: AiService, private router: Router, private toastController: ToastController) { }
 
   ngOnInit() {
     this.id = this.activatedRoute.snapshot.paramMap.get('id') as string;
@@ -136,12 +137,11 @@ export class chatPage implements OnInit {
     }, 100);
 
     setTimeout(() => {
-      textBoxNative.focus();
-      this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
-
       if (this.firstMessageIndex != 0){
         this.showFirstMessage();
       }
+      textBoxNative.focus();
+      this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
     }, 100);
     
   }
@@ -150,6 +150,7 @@ export class chatPage implements OnInit {
     const messageBubbles = document.querySelectorAll(".message-bubble");
     const lastBubble = messageBubbles[this.firstMessageIndex - 1] as HTMLElement;
     lastBubble.style.borderBottom = `1px solid ${this.whiteHighlight}`;
+    lastBubble.style.paddingBottom = '30px';
   }
 
   getSessionData() {
@@ -195,6 +196,8 @@ export class chatPage implements OnInit {
     this.firstMessageIndex = this.messages.length;
     this.saveSessionData();
     this.showFirstMessage();
+    this.conversation.nativeElement.scrollTop = this.conversation.nativeElement.scrollHeight;
+    this.presentToast('Context cleared', 1000, 'top');
   }
 
   async handleSentAction() {
@@ -472,6 +475,22 @@ export class chatPage implements OnInit {
   handleAPIError(data: ChatCompletionChunk) {
     console.log(data.error);
     this.messages.push({ role: 'assistant', content: '```API error\n' + JSON.stringify(data.error, null, 2) + '```' });
+  }
+
+  async presentToast(message: string, duration: number, position: 'top' | 'middle' | 'bottom') {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: duration? duration : 1000,
+      position: position,
+      buttons: [
+        {
+          text: 'Dismiss',
+          role: 'cancel'
+        }
+      ],
+    });
+
+    await toast.present();
   }
 
   // Guard para evitar navegaciones a chats que no han sido creados
