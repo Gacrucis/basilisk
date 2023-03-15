@@ -19,9 +19,14 @@ export class AiService {
   private systemMessage!: Message;
 
   constructor() {
+    // this.systemMessage = {
+    //   role: 'user',
+    //   content: 'Write any example in code format with backticks followed by a newline. For example: ```\nprint("Hello World")\n```'
+    // }
+
     this.systemMessage = {
-      role: 'user',
-      content: 'Write any example in code format with backticks followed by a newline. For example: ```\nprint("Hello World")\n```'
+      role: 'system',
+      content: 'You are a programming asistant bot, you write everything in code format with backticks and the programming language followed by a newline. For example: ```python\nprint("Hello World")\n```'
     }
   }
 

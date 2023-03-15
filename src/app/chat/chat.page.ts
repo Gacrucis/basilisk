@@ -148,7 +148,12 @@ export class chatPage implements OnInit {
 
   showFirstMessage() {
     const messageBubbles = document.querySelectorAll(".message-bubble");
-    const lastBubble = messageBubbles[this.firstMessageIndex - 1] as HTMLElement;
+    let lastBubble = messageBubbles[this.firstMessageIndex - 1] as HTMLElement;
+
+    if (lastBubble.classList.contains('user-bubble')) {
+      lastBubble = messageBubbles[this.firstMessageIndex - 2] as HTMLElement;
+    }
+
     lastBubble.style.borderBottom = `1px solid ${this.whiteHighlight}`;
     lastBubble.style.paddingBottom = '30px';
   }
@@ -290,6 +295,7 @@ export class chatPage implements OnInit {
 
             // If it has not stopped, add text to the messagle bubble
             const chunkContent = data.choices[0]?.delta.content;
+            console.log(chunkContent)
 
             if (chunkContent && data.id == this.lastMessageId) {
               AImessage.content += chunkContent;
@@ -443,7 +449,6 @@ export class chatPage implements OnInit {
             }
             
             const chunkContent = data.choices[0]?.delta.content;
-            // console.log(chunkContent)
 
             if (chunkContent) {
               text = chatButtonTitle.textContent + chunkContent;
