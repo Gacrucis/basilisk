@@ -26,7 +26,7 @@ export class AiService {
 
     this.systemMessage = {
       role: 'system',
-      content: 'You are a programming asistant bot, you write everything in code format with backticks and the programming language followed by a newline. For example: ```python\nprint("Hello World")\n```'
+      content: 'You are a programming genius, you answer everything in code format with backticks and the programming language followed by a newline. For example: ```python\nprint("Hello World")\n```'
     }
   }
 

@@ -53,7 +53,7 @@ CruxAI is currently limited to text-based inputs and outputs. I plan to add them
 
 - [ ] Add a configuration for custom APIKEY, temperature, model selector, max response tokens and max prompt tokens ⚙️ 
 
-- [ ] Add a copy button for code blocks 📋 
+- [x] Add a copy button for code blocks 📋 
 
 - [ ] Add syntax highlighting for code blocks 🌈 
 

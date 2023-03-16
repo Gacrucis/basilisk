@@ -39,7 +39,10 @@ export class chatPage implements OnInit {
   private hasManuallyScrolled = false;
   private maxTokenUsage = 3096;
   private lastMessageId! : string;
-  private whiteHighlight = '#ffffff40';
+
+  private readonly textBoxMinHeight = 100;
+  private readonly textBoxMaxHeight = 300;
+  private readonly whiteHighlight = '#ffffff40';
 
   @ViewChild('textbox', { static: false }) textbox!: ElementRef;
   @ViewChild('conversation', { static: false }) conversation!: ElementRef<HTMLElement>;
@@ -79,12 +82,11 @@ export class chatPage implements OnInit {
       this.router.navigateByUrl('/chat/default');
     }
 
-    var textBoxNative = this.textbox.nativeElement;
-    let height = '100px';
+    const textBoxNative = this.textbox.nativeElement;
 
     if (textBoxNative != null) {
-      textBoxNative.style.height = height;
-      let max = 300;
+
+      textBoxNative.style.height = this.textBoxMinHeight + 'px';
 
       textBoxNative.addEventListener('keydown', (event: KeyboardEvent) => {
         const inputValue = textBoxNative.value.trim();
@@ -113,18 +115,7 @@ export class chatPage implements OnInit {
       });
 
       textBoxNative.addEventListener('input', () => {
-        textBoxNative.style.height = height;
-        textBoxNative.style.height = (textBoxNative.scrollHeight > max ? max : textBoxNative.scrollHeight) + 'px';
-
-        if (textBoxNative.scrollHeight > max) {
-          textBoxNative.style.overflowY = 'scroll';
-        } else {
-          textBoxNative.style.overflowY = 'hidden';
-        }
-
-        let downButtonNative = this.downButton.nativeElement;
-        downButtonNative.style.bottom = (parseInt(textBoxNative.style.height) + 10) + 'px';
-
+        this.adjustTextBoxHeight();
       });
 
     }
@@ -165,7 +156,38 @@ export class chatPage implements OnInit {
   stopLoading(){
     this.isLoading = false
     this.stopButton.nativeElement.disabled = true;
-    // this.stopButton.nativeElement.style.color = '#ffffff40';
+  }
+
+  getSessionData() {
+    const chatSession : LocalStorageSession = {
+      firstMessageIndex: this.firstMessageIndex,
+      messages: this.messages
+    } 
+
+    return chatSession;
+  }
+
+  saveSessionData() {
+    localStorage.setItem(this.id, JSON.stringify(this.getSessionData()));
+  }
+
+  adjustTextBoxHeight() {
+    let height = this.textBoxMinHeight + 'px';
+    let max = this.textBoxMaxHeight;
+
+    const textBoxNative = this.textbox.nativeElement;
+
+    textBoxNative.style.height = height;
+        textBoxNative.style.height = (textBoxNative.scrollHeight > max ? max : textBoxNative.scrollHeight) + 'px';
+
+        if (textBoxNative.scrollHeight > max) {
+          textBoxNative.style.overflowY = 'scroll';
+        } else {
+          textBoxNative.style.overflowY = 'hidden';
+        }
+
+        let downButtonNative = this.downButton.nativeElement;
+        downButtonNative.style.bottom = (parseInt(textBoxNative.style.height) + 10) + 'px';
   }
 
   loadMessages() {
@@ -224,13 +246,31 @@ export class chatPage implements OnInit {
     blockHeader.classList.add('code-header');
     blockContent.classList.add('code-content');
 
-    if (regex){
+    if (regex) {
       blockHeader.innerText = regex[1]? regex[1] : 'code';
       blockContent.innerText = regex[2];
     } else {
       blockHeader.innerText = 'code';
       blockContent.innerText = codeText;
     }
+
+    const clipboardButton = document.createElement('ion-button');
+    clipboardButton.classList.add('custom-button');
+    clipboardButton.classList.add('clipboard-button');
+    clipboardButton.classList.add('code-text');
+    clipboardButton.innerText = 'Copy to clipboard';
+    
+    const clipboardIcon = document.createElement('ion-icon');
+    clipboardIcon.setAttribute('name', 'clipboard-outline');
+    clipboardIcon.style.marginLeft = '5px';
+
+    clipboardButton.appendChild(clipboardIcon);
+    
+    clipboardButton.addEventListener('click', () => {
+      this.saveToClipboard(blockContent.innerText);
+    });
+
+    blockHeader.appendChild(clipboardButton);
 
     codeBlock.appendChild(blockHeader);
     codeBlock.appendChild(blockContent);
@@ -262,6 +302,11 @@ export class chatPage implements OnInit {
     // messageBubble.style.paddingBottom = '30px';
   }
 
+  saveToClipboard(text: string) {
+    navigator.clipboard.writeText(text);
+    this.presentToast('Copied to clipboard', 500, 'top');
+  }
+
   showFirstMessage() {
     const messageBubbles = document.querySelectorAll(".message-bubble");
     let lastBubble = messageBubbles[this.firstMessageIndex - 1] as HTMLElement;
@@ -271,19 +316,6 @@ export class chatPage implements OnInit {
     }
 
     this.processFirstMessage(lastBubble);
-  }
-
-  getSessionData() {
-    const chatSession : LocalStorageSession = {
-      firstMessageIndex: this.firstMessageIndex,
-      messages: this.messages
-    } 
-
-    return chatSession;
-  }
-
-  saveSessionData() {
-    localStorage.setItem(this.id, JSON.stringify(this.getSessionData()));
   }
 
   extractContext() : Message[] {
@@ -335,6 +367,7 @@ export class chatPage implements OnInit {
     this.conversation.nativeElement.appendChild(AIMessageBubble);
 
     this.textbox.nativeElement.value = '';
+    this.adjustTextBoxHeight();
     
     this.messages.push(userMessage);
     this.saveSessionData();
@@ -346,7 +379,7 @@ export class chatPage implements OnInit {
     
     let index = 0;
     let currentId : string = '';
-    
+
     try {
 
       await this.AiService.callAPI(

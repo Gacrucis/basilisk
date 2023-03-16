@@ -37,12 +37,13 @@
           <ion-button class="custom-button" (click)="handleClearAction()">
             <ion-icon slot="icon-only" name="trash-bin-outline"></ion-icon>
           </ion-button>
+
         </div>
 
         <textarea #textbox class="textbox" placeholder="Type something here" (keydown.enter)="handleSentAction()"></textarea>
 
         <div class="right-buttons">
-          <ion-button #stopButton class="custom-button" (click)="handleStopAction()">
+          <ion-button #stopButton disabled class="custom-button" (click)="handleStopAction()">
             <ion-icon slot="icon-only" name="stop-outline"></ion-icon>
           </ion-button>
           <ion-button class="custom-button" (click)="handleSentAction()">

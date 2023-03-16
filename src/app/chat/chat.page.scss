@@ -51,6 +51,13 @@ ion-menu-button {
   --box-shadow: 0;
 }
 
+.clipboard-button {
+  font-size: x-small;
+  color: #f4f5f8;
+  margin: 0px;
+  margin-left: 10px;
+}
+
 .bubble-container {
   display: flex;
   // flex-direction: row;
@@ -95,13 +102,19 @@ p {
 }
 
 .code-header {
+  font-size: small;
+  font-weight: bold;
   color: #E06C75;
   padding: 10px;
   margin: 0;
-  margin-right: 20px;
+  // margin-right: 20px;
   padding-left: 20px;
   margin-bottom: 0;
   white-space: nowrap;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .code-content {
