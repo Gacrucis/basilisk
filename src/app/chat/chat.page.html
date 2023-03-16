@@ -1,30 +1,9 @@
-<!-- <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>{{ chat }}</ion-title>
-  </ion-toolbar>
-</ion-header> -->
 <ion-content [fullscreen]="true">
   <div class="content">
-
-    <!-- <ion-header collapse="condense">
-      <ion-toolbar>
-        <ion-title size="large">{{ chat }}</ion-title>
-      </ion-toolbar>
-    </ion-header> -->
 
     <div class="chat">
 
       <div #conversation class="conversation">
-
-        <!-- <ion-list>
-          <ion-item lines="none" class="bubble-container" *ngFor="let message of messages; let i = index">
-            <div class="message-bubble" [ngClass]="message.role === 'user' ? 'user-bubble' : 'assistant-bubble'" [innerHTML]="processText(message.content)">
-            </div>
-          </ion-item>
-        </ion-list> -->
 
         <ion-button #downButton class="custom-button down-button" (click)="handleDownAction()">
           <ion-icon slot="icon-only" name="chevron-down-outline"></ion-icon>

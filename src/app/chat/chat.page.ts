@@ -30,7 +30,7 @@ interface LocalStorageSession {
   styleUrls: ['./chat.page.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class chatPage implements OnInit {
+export class ChatPage implements OnInit {
   public id!: string;
   public firstMessageIndex = 0;
   public messages: Message[] = [];
@@ -57,7 +57,6 @@ export class chatPage implements OnInit {
     ) { }
 
   ngOnInit() {
-
     this.id = this.activatedRoute.snapshot.paramMap.get('id') as string;
     const data = localStorage.getItem(this.id);
 
@@ -74,7 +73,6 @@ export class chatPage implements OnInit {
   }
 
   ngAfterViewInit() {
-
     let chatSessionsRaw = localStorage.getItem('chatSessions');
     let chatSessions: ChatSession[] = chatSessionsRaw ? JSON.parse(chatSessionsRaw) : [];
 
@@ -243,14 +241,14 @@ export class chatPage implements OnInit {
     const blockContent = document.createElement('div');
     const regex = codeText.match(headerRegex);
 
+    blockHeader.classList.add('code-header');
+    blockContent.classList.add('code-content');
+
     const blockHeaderButton = document.createElement('ion-button');
+    blockHeaderButton.disabled = true;
     blockHeaderButton.classList.add('custom-button');
     blockHeaderButton.classList.add('header-button');
     blockHeaderButton.classList.add('code-button');
-    blockHeaderButton.disabled = true;
-
-    blockHeader.classList.add('code-header');
-    blockContent.classList.add('code-content');
 
     if (regex) {
       blockHeaderButton.innerText = regex[1]? regex[1] : 'code';
@@ -262,32 +260,34 @@ export class chatPage implements OnInit {
 
     blockHeader.appendChild(blockHeaderButton);
 
-    const clipboardButton = document.createElement('ion-button');
-    clipboardButton.classList.add('custom-button');
-    clipboardButton.classList.add('header-button');
-    clipboardButton.classList.add('code-text');
-    clipboardButton.innerText = 'Copy to clipboard';
+    if (!this.isLoading){
+      const clipboardButton = document.createElement('ion-button');
+      clipboardButton.classList.add('custom-button');
+      clipboardButton.classList.add('header-button');
+      clipboardButton.classList.add('code-text');
+      clipboardButton.innerText = 'Copy to clipboard';
+      
+      const clipboardIcon = document.createElement('ion-icon');
+      clipboardIcon.setAttribute('name', 'clipboard-outline');
+      clipboardIcon.style.marginLeft = '5px';
+
+      clipboardButton.appendChild(clipboardIcon);
+      
+      clipboardButton.addEventListener('click', () => {
+        this.saveToClipboard(blockContent.innerText);
+        const beforeHTML = clipboardButton.innerHTML;
+        const width = clipboardButton.offsetWidth;
+        
+        clipboardButton.innerText = 'Copied!';
+        clipboardButton.style.width = width + 'px';
+        setTimeout(() => {
+          clipboardButton.innerHTML = beforeHTML;
+        }, 1000);
+      });
+      
+      blockHeader.appendChild(clipboardButton);
+    }
     
-    const clipboardIcon = document.createElement('ion-icon');
-    clipboardIcon.setAttribute('name', 'clipboard-outline');
-    clipboardIcon.style.marginLeft = '5px';
-
-    clipboardButton.appendChild(clipboardIcon);
-    
-    clipboardButton.addEventListener('click', () => {
-      this.saveToClipboard(blockContent.innerText);
-      const beforeHTML = clipboardButton.innerHTML;
-      const width = clipboardButton.offsetWidth;
-
-      clipboardButton.innerText = 'Copied!';
-      clipboardButton.style.width = width + 'px';
-      setTimeout(() => {
-        clipboardButton.innerHTML = beforeHTML;
-      }, 1000);
-    });
-
-    blockHeader.appendChild(clipboardButton);
-
     codeBlock.appendChild(blockHeader);
     codeBlock.appendChild(blockContent);
 
@@ -473,6 +473,8 @@ export class chatPage implements OnInit {
       this.messages.push({ role: 'assistant', content: '```error\n' + error + '```' });
       return;
     }
+
+    AIMessageBubble.innerHTML = this.processMessageContent(AIMessage).innerHTML;
 
     this.saveSessionData();
     await this.addTitle()
