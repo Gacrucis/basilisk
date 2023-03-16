@@ -55,7 +55,7 @@ CruxAI is currently limited to text-based inputs and outputs. I plan to add them
 
 - [x] Add a copy button for code blocks 📋 
 
-- [ ] Add syntax highlighting for code blocks 🌈 
+- [x] Add syntax highlighting for code blocks 🌈 
 
 - [ ] Support for image API 🖼️ 
 

@@ -254,14 +254,17 @@ export class ChatPage implements OnInit {
 
     if (regex) {
       blockHeaderButton.innerText = regex[1]? regex[1] : 'code';
-      // blockContent.innerText = regex[2];
-      if (regex[1]) {
-        blockContent.innerHTML = hljs.default.highlight(regex[2], {language: regex[1], ignoreIllegals: true}).value;
-      } else {
-        blockContent.innerHTML = hljs.default.highlightAuto(regex[2]).value;
+      
+      try {
+        if (regex[1]) {
+          blockContent.innerHTML = hljs.default.highlight(regex[2], {language: regex[1], ignoreIllegals: true}).value;
+        } else {
+          blockContent.innerHTML = hljs.default.highlightAuto(regex[2]).value;
+        }
+      } catch (error) {
+        blockContent.innerText = regex[2];
       }
 
-      // hljs.default.highlight('', 'printf("Hello World");')
     } else {
       blockHeaderButton.innerText = 'code';
       blockContent.innerText = codeText;
