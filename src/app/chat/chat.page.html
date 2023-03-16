@@ -19,12 +19,12 @@
 
       <div #conversation class="conversation">
 
-        <ion-list>
-          <ion-item lines="none" class="bubble-container" *ngFor="let message of messages">
+        <!-- <ion-list>
+          <ion-item lines="none" class="bubble-container" *ngFor="let message of messages; let i = index">
             <div class="message-bubble" [ngClass]="message.role === 'user' ? 'user-bubble' : 'assistant-bubble'" [innerHTML]="processText(message.content)">
             </div>
           </ion-item>
-        </ion-list>
+        </ion-list> -->
 
         <ion-button #downButton class="custom-button down-button" (click)="handleDownAction()">
           <ion-icon slot="icon-only" name="chevron-down-outline"></ion-icon>
@@ -42,7 +42,7 @@
         <textarea #textbox class="textbox" placeholder="Type something here" (keydown.enter)="handleSentAction()"></textarea>
 
         <div class="right-buttons">
-          <ion-button class="custom-button" (click)="handleStopAction()">
+          <ion-button #stopButton class="custom-button" (click)="handleStopAction()">
             <ion-icon slot="icon-only" name="stop-outline"></ion-icon>
           </ion-button>
           <ion-button class="custom-button" (click)="handleSentAction()">
