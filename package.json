@@ -25,6 +25,7 @@
     "@capacitor/keyboard": "4.1.1",
     "@capacitor/status-bar": "4.1.1",
     "@ionic/angular": "^6.1.9",
+    "highlight.js": "^11.7.0",
     "ionicons": "^6.0.3",
     "openai": "^3.2.1",
     "rxjs": "~7.5.0",

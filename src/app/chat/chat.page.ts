@@ -3,6 +3,8 @@ import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@an
 import { ActivatedRoute, Router, RouterStateSnapshot } from '@angular/router';
 import { ChatSession } from '../app.component';
 import { ToastController } from '@ionic/angular';
+import * as hljs from 'highlight.js'
+
 
 interface ChatCompletionChunk {
   id: string;
@@ -27,7 +29,7 @@ interface LocalStorageSession {
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.page.html',
-  styleUrls: ['./chat.page.scss'],
+  styleUrls: ['./chat.page.scss', './code.styles.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class ChatPage implements OnInit {
@@ -252,7 +254,14 @@ export class ChatPage implements OnInit {
 
     if (regex) {
       blockHeaderButton.innerText = regex[1]? regex[1] : 'code';
-      blockContent.innerText = regex[2];
+      // blockContent.innerText = regex[2];
+      if (regex[1]) {
+        blockContent.innerHTML = hljs.default.highlight(regex[2], {language: regex[1], ignoreIllegals: true}).value;
+      } else {
+        blockContent.innerHTML = hljs.default.highlightAuto(regex[2]).value;
+      }
+
+      // hljs.default.highlight('', 'printf("Hello World");')
     } else {
       blockHeaderButton.innerText = 'code';
       blockContent.innerText = codeText;
@@ -522,7 +531,6 @@ export class ChatPage implements OnInit {
     }
 
     let chatButtonTitle = chatButton.querySelector('ion-label') as HTMLElement;
-    console.log(chatButtonTitle)
     let firstPrompt = this.messages[0].content;
 
     const buttonParent = chatButton.parentElement;
