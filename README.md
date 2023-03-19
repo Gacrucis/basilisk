@@ -4,8 +4,7 @@ CruxAI is an Angular application that utilizes the OpenAI API to generate intell
 
 ## Screenshots
 
-![](https://i.imgur.com/eHH3POo.png)
-![](https://i.imgur.com/GJ6aGHb.png)
+![](https://i.imgur.com/tBj4dSE.png)
 
 ## Features
 
