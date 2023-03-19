@@ -238,10 +238,10 @@ export class ChatPage implements OnInit {
     // textBlock.classList.add('text');
     // codeBlock.innerText = codeText;
 
-    const headerRegex = /^(\w*)\n(.+)/s;
+    const codeRegex = /^(\w*)\n(.+)/s;
     const blockHeader = document.createElement('div');
     const blockContent = document.createElement('div');
-    const regex = codeText.match(headerRegex);
+    const regex = codeText.match(codeRegex);
 
     blockHeader.classList.add('code-header');
     blockContent.classList.add('code-content');
@@ -256,11 +256,11 @@ export class ChatPage implements OnInit {
       blockHeaderButton.innerText = regex[1]? regex[1] : 'code';
       
       try {
-        if (regex[1]) {
-          blockContent.innerHTML = hljs.default.highlight(regex[2], {language: regex[1], ignoreIllegals: true}).value;
-        } else {
+        // if (regex[1]) {
+        //   blockContent.innerHTML = hljs.default.highlight(regex[2], {language: regex[1], ignoreIllegals: true}).value;
+        // } else {
           blockContent.innerHTML = hljs.default.highlightAuto(regex[2]).value;
-        }
+        // }
       } catch (error) {
         blockContent.innerText = regex[2];
       }
@@ -272,10 +272,12 @@ export class ChatPage implements OnInit {
 
     blockHeader.appendChild(blockHeaderButton);
 
+    // if (!this.isLoading){
     if (!this.isLoading){
       const clipboardButton = document.createElement('ion-button');
       clipboardButton.classList.add('custom-button');
       clipboardButton.classList.add('header-button');
+      clipboardButton.classList.add('copy-button');
       clipboardButton.classList.add('code-text');
       clipboardButton.innerText = 'Copy to clipboard';
       
@@ -285,25 +287,41 @@ export class ChatPage implements OnInit {
 
       clipboardButton.appendChild(clipboardIcon);
       
-      clipboardButton.addEventListener('click', () => {
-        this.saveToClipboard(blockContent.innerText);
-        const beforeHTML = clipboardButton.innerHTML;
-        const width = clipboardButton.offsetWidth;
-        
-        clipboardButton.innerText = 'Copied!';
-        clipboardButton.style.width = width + 'px';
-        setTimeout(() => {
-          clipboardButton.innerHTML = beforeHTML;
-        }, 1000);
-      });
-      
+      clipboardButton.addEventListener('click', this.getCopyButtonListener(clipboardButton, blockContent.innerText));
+
       blockHeader.appendChild(clipboardButton);
+
     }
     
     codeBlock.appendChild(blockHeader);
     codeBlock.appendChild(blockContent);
 
     return codeBlock;
+  }
+
+  addEventListenersToCodeBlock(codeBlock: HTMLDivElement) {
+    const clipboardButton = codeBlock.querySelector('.copy-button') as HTMLButtonElement;
+    const content = codeBlock.querySelector('.code-content') as HTMLDivElement;
+
+    if (!clipboardButton || !content) {
+      return;
+    }
+
+    clipboardButton.addEventListener('click', this.getCopyButtonListener(clipboardButton, content.innerText));
+  }
+
+  getCopyButtonListener(button: HTMLElement, content: string) {
+    return () => {
+      this.saveToClipboard(content.trim());
+      const beforeHTML = button.innerHTML;
+      const width = button.offsetWidth;
+      
+      button.innerText = 'Copied!';
+      button.style.width = width + 'px';
+      setTimeout(() => {
+        button.innerHTML = beforeHTML;
+      }, 1000);
+    }
   }
 
   processTextBlock(text: string){
@@ -328,6 +346,40 @@ export class ChatPage implements OnInit {
   processFirstMessage(messageBubble: HTMLElement){
     messageBubble.style.borderBottom = `1px solid ${this.whiteHighlight}`;
     // messageBubble.style.paddingBottom = '30px';
+  }
+
+  updateMessage(messageBubble: HTMLDivElement, message: Message, newContent: string) {
+    message.content += newContent;
+    message.content = message.content.charAt(0).toUpperCase() + message.content.slice(1);
+
+    const newBubble = this.processMessageContent(message);
+    // Si el procesamiento de texto resulta en un nuevo elemento HTML, agregarlo como innerHTML
+    if (newBubble.children.length != messageBubble.children.length) {
+      messageBubble.innerHTML = newBubble.innerHTML;
+      return;
+    }
+    
+    const lastChild = messageBubble.lastChild! as HTMLElement;
+    const newLastChild = newBubble.lastChild! as HTMLElement;
+    // Si el ultimo elemento es texto, actualizarlo normalmente
+    if (lastChild.tagName == 'P') {
+      lastChild.innerHTML = newLastChild.innerHTML;
+      return
+    }
+
+    // Si en cambio, se trata de codigo, solo actualizar el contenido y no el encabezado
+    const codeContent = lastChild.querySelector('.code-content') as HTMLElement;
+
+    // Si aun no hay texto en el contenido del codigo, sobreescribir como lo es habitualmente
+    if (codeContent.innerText.length == 0) {
+      messageBubble.innerHTML = newBubble.innerHTML;
+      return;
+    }
+
+    // Si en cambio, ya hay texto en el contenido del codigo, solo agregar el nuevo texto
+    const newCodeContent = newLastChild.querySelector('.code-content') as HTMLElement;
+    codeContent.innerHTML = newCodeContent.innerHTML;
+    
   }
 
   saveToClipboard(text: string) {
@@ -426,12 +478,6 @@ export class ChatPage implements OnInit {
           while (index <= newIndex) {
             const rawData = newReturnedData[index++].trim();
 
-            // try {
-            //   console.log(JSON.parse(rawData));
-            // } catch (e) {
-            //   console.log(rawData);
-            // }
-
             if (rawData === '[DONE]') {
               console.log('Finished stream');
               return;
@@ -472,10 +518,11 @@ export class ChatPage implements OnInit {
             // console.log(chunkContent)
 
             if (chunkContent && data.id == this.lastMessageId) {
-              AIMessage.content += chunkContent;
-              AIMessage.content = AIMessage.content.charAt(0).toUpperCase() + AIMessage.content.slice(1);
+              // AIMessage.content += chunkContent;
+              // AIMessage.content = AIMessage.content.charAt(0).toUpperCase() + AIMessage.content.slice(1);
 
-              AIMessageBubble.innerHTML = this.processMessageContent(AIMessage).innerHTML;
+              // AIMessageBubble.innerHTML = this.processMessageContent(AIMessage).innerHTML;
+              this.updateMessage(AIMessageBubble, AIMessage, chunkContent);
             }
           }
 
@@ -487,6 +534,7 @@ export class ChatPage implements OnInit {
     }
 
     AIMessageBubble.innerHTML = this.processMessageContent(AIMessage).innerHTML;
+    this.addEventListenersToCodeBlock(AIMessageBubble);
 
     this.saveSessionData();
     await this.addTitle()

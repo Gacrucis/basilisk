@@ -67,6 +67,8 @@ CruxAI is currently limited to text-based inputs and outputs. I plan to add them
 
 - [ ] Stop the underlying chat div to trigger onclick when clicking close button
 
+- [ ] Stop the previous message from continuing when a new one is sent
+
 ## Contributing
 
 If you find a bug or have a feature suggestion, please create an issue or submit a pull request.

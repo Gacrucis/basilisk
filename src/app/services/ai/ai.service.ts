@@ -47,7 +47,7 @@ export class AiService {
     return await this.api.createChatCompletion (
       this.getBody(messages),
       {
-        responseType: 'stream',
+        // responseType: 'stream',
         onDownloadProgress: onDownloadProgressCallback
       }
     );
