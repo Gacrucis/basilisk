@@ -12,7 +12,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Gacrucis/basilisk">
-    <img src="https://i.imgur.com/6aSG740.png" alt="Logo" width="80" height="80">
+    <img src="https://raw.githubusercontent.com/Gacrucis/basilisk/master/src/assets/icon/logo_full_bordered.png" alt="Logo" height="80">
   </a>
 
 <h3 align="center">Basilisk</h3>
