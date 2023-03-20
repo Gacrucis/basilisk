@@ -190,3 +190,17 @@ background: #f4f5f8;
 .sc-ion-textarea-md-h {
   --padding-top: 0px !important;
 }
+
+
+.logo {
+  max-height: 2vh;
+  image-rendering: optimizeQuality;
+  padding-left: 10px;
+}
+
+.logo-text {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #f4f5f8;
+  margin-left: 10px;
+}

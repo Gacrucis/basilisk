@@ -2,7 +2,13 @@
   <ion-split-pane contentId="main-content">
     <ion-menu contentId="main-content" type="overlay">
       <ion-content>
-        <img class="logo" src="../assets/icon/logo-inline.png" alt="Ionic logo" />
+
+        <div>
+          <img class="logo" src="../assets/icon/LOGO_02.png" alt="Ionic logo" />
+          <span class="logo-text"> Basilisk </span>
+        </div>
+
+        <!-- <img class="logo" src="../assets/icon/logo-inline.png" alt="Ionic logo" /> -->
 
         <ion-list id="chat-list">
           <!-- <ion-list-header>Chats</ion-list-header> -->
@@ -26,7 +32,7 @@
                 <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
                 <ion-label *ngIf="p.title">{{ p.title }}</ion-label>
                 <ion-label *ngIf="!p.title">Chat {{ p.id }}</ion-label>
-                <ion-button class="custom-button" (click)="handleDeleteChatAction(p.id, $event)">
+                <ion-button class="custom-button" slot="end" (click)="handleDeleteChatAction(p.id, $event)">
                   <ion-icon slot="icon-only" name="close-outline"></ion-icon>
                 </ion-button>
               </ion-item>
